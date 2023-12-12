@@ -1,0 +1,25 @@
+FROM golang:1.21.5-alpine as build
+
+WORKDIR /build
+
+COPY . .
+
+RUN apk add --no-cache git \
+  && go build -o sashimi ./main.go \
+  && go build -o job_a ./examples/go/job_a/main.go \
+  && go build -o job_a_split ./examples/go/job_a/split_job/main.go \
+  && go build -o job_b ./examples/go/job_b/main.go \
+  && go build -o job_b_split ./examples/go/job_b/split_job/main.go
+
+FROM alpine
+
+WORKDIR /cmd
+
+RUN apk add --no-cache bash
+
+COPY --from=build /build/sashimi .
+COPY --from=build /build/job_a .
+COPY --from=build /build/job_a_split .
+COPY --from=build /build/job_b .
+COPY --from=build /build/job_b_split .
+COPY --from=build /build/examples/job_runner.sh .

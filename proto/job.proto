@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package proto;
+
+option go_package = "./proto";
+
+message SplitJobResponse {
+  repeated string commands = 1;
+}
+
+service Job {
+  rpc SplitJob(google.protobuf.Empty) returns (SplitJobResponse) {}
+}
